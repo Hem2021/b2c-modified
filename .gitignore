@@ -1,0 +1,11 @@
+*.pyc
+__pycache__/
+.DS_Store
+assets/
+b2c/
+data/
+delme/
+stub/
+temp/
+tesss.zip
+test.py
