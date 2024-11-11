@@ -42,11 +42,11 @@ class Config:
     else:
         lr = 5e-3
     lr_dec_epoch = [30, 50]
-    end_epoch = 5
+    end_epoch = 3
     lr_dec_factor = 10
     momentum = 0.9
     weight_decay = 1e-4
-    train_batch_size = 5
+    train_batch_size = 1
     train_aug = True
     reg_weight = 4.5
     ## testing config

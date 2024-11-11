@@ -155,6 +155,8 @@ class Trainer(Base):
         self.logger.info("Creating dataset...")
         # load the dataset class i.e. NTU, KINETICS, MIMETICS
         trainset_loader = eval(cfg.dataset)("train")
+        valset_loader = eval(cfg.dataset)("val")
+
         # train_batch_size = 3
         batch_generator = DataLoader(
             dataset=trainset_loader,
@@ -164,12 +166,26 @@ class Trainer(Base):
             num_workers=cfg.num_thread,
             pin_memory=True,
         )
-        print("train_batch_size : ", cfg.train_batch_size)
+        val_batch_generator = DataLoader(
+            dataset=valset_loader,
+            batch_size=1 * cfg.test_batch_size,
+            shuffle=True,
+            num_workers=cfg.num_thread,
+            pin_memory=True,
+        )
+
+        # print("train_batch_size : ", cfg.train_batch_size)
 
         self.trainset = trainset_loader
+        
         self.batch_generator = batch_generator
+        self.val_batch_generator = val_batch_generator
+
         self.itr_per_epoch = math.ceil(
             trainset_loader.__len__() / cfg.num_gpus / cfg.train_batch_size
+        )
+        self.itr_per_epoch_eval = math.ceil(
+            valset_loader.__len__() / cfg.num_gpus / cfg.test_batch_size
         )
         self.class_num = self.trainset.class_num
         self.joint_num = self.trainset.joint_num
@@ -195,14 +211,14 @@ class Trainer(Base):
         else:
             start_epoch = 0
 
-        print("before model.train()")
-        model.train()
-        print("after model.train()")
+        # print("before model.train()")
+        # model.train()
+        # print("after model.train()")
 
         self.start_epoch = start_epoch
         self.model = model
         self.optimizer = optimizer
-        print("_make_model() done")
+        # print("_make_model() done")
 
 
 class Tester(Base):

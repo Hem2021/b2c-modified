@@ -4,7 +4,7 @@ import logging
 
 # Add the root directory (B2C) to sys.path
 # sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-print("Inside Model.py")
+# print("Inside Model.py")
 
 import torch
 import torch.nn as nn
@@ -578,18 +578,18 @@ class Model(nn.Module):
         #     action_label_out = action_label_out.view(batch_size, pose_frame_num, -1).mean(1)
         # # pose late fusion
         elif cfg.mode == "rgb+pose":
-            logger("Inside model.py > forward > rgb+pose ... ")
+            # logger("Inside model.py > forward > rgb+pose ... ")
             dark_video_feat = self.img_backbone(dark_input_video, skip_early=False)
             light_video_feat = self.img_backbone(light_input_video, skip_early=False)
-            print("light_video_feat.shape : ", light_video_feat.shape)
+            # print("light_video_feat.shape : ", light_video_feat.shape)
             # pose_feat = self.pose2feat(input_pose_hm, input_pose_limb_hm, input_pose_limb_mo)
             # pose_feat = self.pose_backbone(pose_feat, skip_early=True)
-            logger("Insidd model.py > CALLED  ")
+            # logger("Insidd model.py > CALLED  ")
 
             video_pose_feat, pose_gate, video_gate = self.aggregator(
                 dark_video_feat, light_video_feat
             )
-            bug(("pose_gate.shape : ", pose_gate.shape))
+            # bug(("pose_gate.shape : ", pose_gate.shape))
             # bug(("pose_gate", pose_gate))
             action_label_out = self.classifier(video_pose_feat)
             action_label_out = action_label_out.view(
@@ -598,25 +598,32 @@ class Model(nn.Module):
 
         # print("from model.py > forward > action_label_out: ", action_label_out)
 
-        if mode == "train":
-            # loss functions
-            loss = {}
-            loss["action_cls"] = self.ce_loss(action_label_out, targets["action_label"])
-            if cfg.mode == "rgb+pose" and cfg.pose_gate:
+        loss = {}
+        loss["action_cls"] = self.ce_loss(action_label_out, targets["action_label"])
+        if cfg.mode == "rgb+pose" and cfg.pose_gate:
                 loss["pose_gate"] = (
                     self.bce_loss(pose_gate, torch.zeros_like(pose_gate) + 0.5)
                     * cfg.reg_weight
                 )
+
+        if mode == "train":
+            # loss functions
+            # if cfg.mode == "rgb+pose" and cfg.pose_gate:
+            #     loss["pose_gate"] = (
+            #         self.bce_loss(pose_gate, torch.zeros_like(pose_gate) + 0.5)
+            #         * cfg.reg_weight
+            #     )
             return loss
 
         else:
             # test output
             out = {}
             out["action_prob"] = F.softmax(action_label_out, 1)
+
             out["img_id"] = meta_info["img_id"]
             if cfg.mode == "rgb+pose" and cfg.pose_gate:
                 out["pose_gate"] = pose_gate.view(batch_size, -1).mean((1))
-            return out
+            return out, loss
 
 
 def init_weights(m):

@@ -171,7 +171,7 @@ class ARID(data.Dataset):
         target_transform=None,
         video_transform=None,
         ensemble_training=False,
-        gamma=1.8,
+        gamma=5, # authors use 5 in ARID paper
         # gamma=None,
     ):
 
